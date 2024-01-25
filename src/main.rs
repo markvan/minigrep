@@ -1,6 +1,7 @@
 use std::env;
 use std::fs;
 use std::process;
+use std::error::Error;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -10,13 +11,20 @@ fn main() {
     });
     println!("\nSearching for {} in file {}\n", config.query, config.file_path);
 
-    run(config);
+    if let Err(e) = run(config) {
+        println!("Application error: {e}");
+        process::exit(1);
+    }
 }
 
-fn run(config: Config) {
-    let contents = fs::read_to_string(config.file_path)
-        .expect("Something went wrong reading the file");
+fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    // ? operator returns the error value from the current function for the caller to handle
+      // If the value is an Ok value, the Ok will be returned from this expression and the program will continue
+    let contents = fs::read_to_string(config.file_path)?;
+
     println!("With text:\n{}", contents);
+    // need to wrap the OK return value in a Result, Ok, to match the signature of the run function
+    Ok(())
 }
 
 struct Config {
